@@ -4,4 +4,5 @@ Version: 0.1
 Requires-Dist: emd-signal
 Requires-Dist: pandas
 Requires-Dist: matplotlib
+Requires-Dist: openpyxl
 Dynamic: requires-dist

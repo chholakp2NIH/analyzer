@@ -4,6 +4,8 @@ channels:
 dependencies:
   - python
   - pypdf2
+  - pingouin
+  - statsmodels
   - pip
   - pip:
     - -e .

@@ -1,4 +1,6 @@
 import pingouin as pg
+import statsmodels.api as sm
+from patsy import dmatrices
 from scipy import stats
 
 from .base import PairedAnalyzer, SingleDataAnalyzer
@@ -66,6 +68,37 @@ class StatisticalAnalyzer(SingleDataAnalyzer):
         for col in cols_of_interest:
             print(f"Normality check on '{col}':")
             self.normality[col] = test_normality_shapirowilk(self.df[col])
+
+    def calculate_group_diff(
+        self, col_outcome: str, col_grp: str, cols_covar=[], method: str = "OLS"
+    ):
+        """
+        Calculates the group difference (identified by `col_grp`) in `col_outcome`.
+        Optionally, provide a list of colums to use as covariates (`cols_covar`)
+        in the statistical regression model, specified by `method`.
+        """
+        formula_design_mat = f"{col_outcome} ~ {col_grp}"
+        for col in cols_covar:
+            formula_design_mat += f" + {col}"
+        print("Design matrix formula:", formula_design_mat)
+
+        # Design matrix
+        y, X = dmatrices(formula_design_mat, data=self.df, return_type="dataframe")
+
+        # Describe stat model and run fitting
+        if method == "OLS":  # continuous outcome; diff in mean
+            res = sm.OLS(y, X).fit()
+        elif method == "QuantReg-Median":  # continuous outcome; diff in median
+            res = sm.QuantReg(y, X).fit(q=0.5)
+        elif method == "Gamma":  # continuous outcome; skewed distribution
+            res = sm.GLM(y, X, family=sm.families.Gamma()).fit()
+        elif method == "Logit":  # binary outcome
+            res = sm.Logit(y, X).fit()
+        else:
+            raise ValueError("Unknown statistical model specified.")
+        print(res.summary())  # Summarize model
+        print(f"\n{method}-Regression: p-value = {res.pvalues.iloc[1]:0.2E}")
+        # print(res.tvalues, res.pvalues)
 
     def calculate_corr_cols(self, col1, col2):
         """

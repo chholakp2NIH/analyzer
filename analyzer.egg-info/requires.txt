@@ -1,3 +1,4 @@
 emd-signal
 pandas
 matplotlib
+openpyxl

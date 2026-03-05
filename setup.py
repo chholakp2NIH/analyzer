@@ -4,7 +4,7 @@ setup(
     name="analyzer",
     version="0.1",
     packages=find_packages(),
-    install_requires=["emd-signal", "pandas", "matplotlib"],
+    install_requires=["emd-signal", "pandas", "matplotlib", "openpyxl"],
     extra_requires={
         "conda": ["pypdf2"],
         "pip": ["neuronol"],
