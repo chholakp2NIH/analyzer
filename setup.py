@@ -5,7 +5,7 @@ setup(
     version="0.1",
     packages=find_packages(),
     install_requires=["emd-signal", "pandas", "matplotlib", "openpyxl"],
-    extra_requires={
+    extras_require={
         "conda": ["pypdf2"],
         "pip": ["neuronol"],
     },  # this does not install, only documents
