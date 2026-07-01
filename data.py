@@ -1,4 +1,5 @@
 import os
+import sqlite3
 
 import pandas as pd
 
@@ -66,12 +67,36 @@ class DataContainer:
         print(f"Created merged data with {len(merged_df)} entries.")
         return DataContainer.from_dataframe(merged_df)
 
+    def to_sqlitedb_table(
+        self,
+        fpath_db: str,
+        table_name: str,
+        if_exists: str = "replace",
+        index: bool = False,
+        **kwargs,
+    ):
+        """
+        Write df to a table `table_name` in a sqlite db pointed to by
+        `fpath_db`.
+        """
+        with sqlite3.connect(fpath_db) as conn:
+            self.df.to_sql(table_name, conn, if_exists=if_exists, index=index, **kwargs)
+            conn.commit()
+        return None
+
     @classmethod
     def from_dataframe(cls, df):
         obj = cls.__new__(cls)
         obj.fpath = None
         obj.df = df
         return obj
+
+    @classmethod
+    def from_sqlitedb_table(cls, fpath_db: str, table_name: str):
+        conn = sqlite3.connect(fpath_db)
+        df = pd.read_sql_query(f"SELECT * FROM {table_name}", conn)
+        conn.close()
+        return cls.from_dataframe(df)
 
 
 class ClinicalDataContainer(DataContainer):
